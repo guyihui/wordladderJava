@@ -8,12 +8,13 @@ import java.util.Stack;
 
 public class Main {
 
+    static char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+
     public static void main(String[] args) throws FileNotFoundException {
         printHeading();
 //        input dictionary name and check
         Scanner scanner = new Scanner(System.in);
         String filepath = getDictionaryPath(scanner);
-
         while (true) {
 //            input target and source
             System.out.print("input word #1(source):");
@@ -21,28 +22,25 @@ public class Main {
             int len = source.length();
             System.out.print("input word #2(target):");
             String target = scanner.nextLine();
-            if(len!=target.length()) continue;
+            if (len != target.length()) continue;
 //            load words with equal length into set
             Scanner sc = new Scanner(new File(filepath));
             HashSet<String> set = new HashSet<>();
             loadDictionary(len, sc, set);
 //            find ladder
             Stack<String> ladder = new Stack<>();
-            ladder.push(target);
+            ladder.push(source);
             Stack<Stack<String>> ladders = new Stack<>();
             ladders.push(ladder);
-
+            Stack<String> result = wordLadder(set, ladders, target);
 //            output
             System.out.println("ladder from {" + source + "} to {" + target + "}:");
-
-
+            printLadder(result);
 //            continue
             System.out.println("press enter to continue('q' to quit):");
             String quit = scanner.nextLine();
             if (quit.equals("q")) break;
         }
-
-
     }
 
     private static void loadDictionary(int len, Scanner sc, HashSet<String> set) {
@@ -59,7 +57,7 @@ public class Main {
             System.out.print("input your dictionary(filename):");
             String dic = scanner.nextLine();
             File file = new File(dic);
-            if (file.exists()){
+            if (file.exists()) {
                 return dic;
             }
             System.out.println("File not found.");
@@ -71,19 +69,46 @@ public class Main {
         System.out.println();
     }
 
-    private static Stack<String> wordLadder(HashSet<String> set, Stack<Stack<String>> ladders, String source) {
+    private static Stack<String> wordLadder(HashSet<String> set, Stack<Stack<String>> ladders, String target) {
+        if (ladders.size() == 0) {
+            Stack<String> stk = new Stack<>();
+            stk.push("Not found.");
+            return stk;
+        }
         Stack<Stack<String>> longerLadder = new Stack<>();
-        for (Stack<String> lad : ladders) {
+        int laddersSize = ladders.size();
+        for (int k = 0; k < laddersSize; k++) {
+//            System.out.println("k=" + k);
+            Stack<String> lad = ladders.pop();
+//            printLadder(lad);
             String top = lad.lastElement();
             for (int i = 0; i < top.length(); i++) {
 //                replace the letter on position i
-
-
-
-
-
+                StringBuilder newWord = new StringBuilder(top);
+                for (int j = 0; j < 26; j++) {
+                    newWord.setCharAt(i, alphabet[j]);
+                    if (newWord.toString().equals(target)) {
+                        lad.push(newWord.toString());
+                        return lad;
+                    } else if (!newWord.toString().equals(top) && set.contains(newWord.toString())) {
+                        lad.push(newWord.toString());
+//                        printLadder(lad);
+                        set.remove(newWord.toString());
+                        longerLadder.push((Stack<String>)lad.clone());
+                        lad.pop();
+                    }
+                }
             }
         }
-        return wordLadder(set, longerLadder, source);
+//        System.out.println("*************");
+        return wordLadder(set, longerLadder, target);
+    }
+
+    private static void printLadder(Stack<String> stk) {
+        int len = stk.size();
+        for (int i = 0; i < len; i++) {
+            System.out.print(stk.elementAt(i) + " ");
+        }
+        System.out.println();
     }
 }
