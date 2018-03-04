@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         printHeading();
 //        input dictionary name and check
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);//console input
         String filepath = getDictionaryPath(scanner);
         while (true) {
 //            input target and source
@@ -24,15 +24,17 @@ public class Main {
             String target = scanner.nextLine();
             if (len != target.length()) continue;
 //            load words with equal length into set
-            Scanner sc = new Scanner(new File(filepath));
+            Scanner sc = new Scanner(new File(filepath));//file input
             HashSet<String> set = new HashSet<>();
             loadDictionary(len, sc, set);
+            if (!(set.contains(source) && set.contains(target))) { //check whether source/target is in the dictionary
+                System.out.println("{" + source + "} in dictionary:" + set.contains(source));
+                System.out.println("{" + target + "} in dictionary:" + set.contains(target));
+                continue;
+            }
 //            find ladder
-            Stack<String> ladder = new Stack<>();
-            ladder.push(source);
-            Stack<Stack<String>> ladders = new Stack<>();
-            ladders.push(ladder);
-            Stack<String> result = wordLadder(set, ladders, target);
+            Stack<Stack<String>> ladders = prepareLadderStacks(source);
+            Stack<String> result = wordLadder(set, ladders, target);//core logical part
 //            output
             System.out.println("ladder from {" + source + "} to {" + target + "}:");
             printLadder(result);
@@ -41,6 +43,14 @@ public class Main {
             String quit = scanner.nextLine();
             if (quit.equals("q")) break;
         }
+    }
+
+    private static Stack<Stack<String>> prepareLadderStacks(String source) {
+        Stack<String> ladder = new Stack<>();
+        ladder.push(source);
+        Stack<Stack<String>> ladders = new Stack<>();
+        ladders.push(ladder);
+        return ladders;
     }
 
     private static void loadDictionary(int len, Scanner sc, HashSet<String> set) {
@@ -55,10 +65,10 @@ public class Main {
     private static String getDictionaryPath(Scanner scanner) {
         while (true) {
             System.out.print("input your dictionary(filename):");
-            String dic = scanner.nextLine();
-            File file = new File(dic);
+            String dicPath = scanner.nextLine();
+            File file = new File(dicPath);
             if (file.exists()) {
-                return dic;
+                return dicPath;
             }
             System.out.println("File not found.");
         }
@@ -78,9 +88,7 @@ public class Main {
         Stack<Stack<String>> longerLadder = new Stack<>();
         int laddersSize = ladders.size();
         for (int k = 0; k < laddersSize; k++) {
-//            System.out.println("k=" + k);
             Stack<String> lad = ladders.pop();
-//            printLadder(lad);
             String top = lad.lastElement();
             for (int i = 0; i < top.length(); i++) {
 //                replace the letter on position i
@@ -92,7 +100,6 @@ public class Main {
                         return lad;
                     } else if (!newWord.toString().equals(top) && set.contains(newWord.toString())) {
                         lad.push(newWord.toString());
-//                        printLadder(lad);
                         set.remove(newWord.toString());
                         longerLadder.push((Stack<String>)lad.clone());
                         lad.pop();
@@ -100,7 +107,6 @@ public class Main {
                 }
             }
         }
-//        System.out.println("*************");
         return wordLadder(set, longerLadder, target);
     }
 
