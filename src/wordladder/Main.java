@@ -45,7 +45,7 @@ public class Main {
         }
     }
 
-    private static Stack<Stack<String>> prepareLadderStacks(String source) {
+    public static Stack<Stack<String>> prepareLadderStacks(String source) {
         Stack<String> ladder = new Stack<>();
         ladder.push(source);
         Stack<Stack<String>> ladders = new Stack<>();
@@ -79,7 +79,7 @@ public class Main {
         System.out.println();
     }
 
-    private static Stack<String> wordLadder(HashSet<String> set, Stack<Stack<String>> ladders, String target) {
+    private static Stack<String> wordLadder(HashSet<String> set, Stack<Stack<String>> ladders, String target)  {
         if (ladders.size() == 0) {
             Stack<String> stk = new Stack<>();
             stk.push("Not found.");
